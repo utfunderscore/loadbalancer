@@ -31,7 +31,6 @@ java -Xmx500m -jar loadbalancer.jar
 ./gradlew shadowJar
 ```
 
-## 4. 
 [contributors-shield]: https://img.shields.io/github/contributors/utfunderscore/loadbalancer.svg
 [contributors-url]: https://github.com/utfunderscore/loadbalancer/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/utfunderscore/loadbalancer.svg
