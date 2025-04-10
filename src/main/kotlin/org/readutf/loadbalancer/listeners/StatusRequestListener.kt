@@ -2,6 +2,8 @@ package org.readutf.loadbalancer.listeners
 
 import com.sksamuel.hoplite.watch.ReloadableConfig
 import io.github.oshai.kotlinlogging.KotlinLogging
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minestom.server.network.packet.client.handshake.ClientHandshakePacket
@@ -27,7 +29,13 @@ class StatusRequestListener(
     ) {
         logger.info { "Server list ping from ${client.socketChannel.remoteAddress}" }
 
-        val handshakeInfo: ClientHandshakePacket = client.handshakeInfo
+        val handshakeInfo: ClientHandshakePacket? = client.handshakeInfo
+
+        if (handshakeInfo == null) {
+            logger.warn { "Handshake info is null" }
+            client.disconnect(Component.text("Internal error occurred").color(NamedTextColor.RED))
+            return
+        }
 
         var jsonResponse =
             Loadbalancer.gson.toJson(
