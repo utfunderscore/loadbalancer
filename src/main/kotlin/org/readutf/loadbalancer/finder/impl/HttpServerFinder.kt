@@ -17,19 +17,26 @@ class HttpServerFinder(
     val hostPath: String,
     val portPath: String,
 ) : ServerFinder {
-    override fun findServer(player: Player): Result<TargetServer, Throwable> {
-        return runCatching {
-            val json = makeRequest(endpoint).getOrThrow()
+    override fun findServer(player: Player): Result<TargetServer, Throwable> =
+        runCatching {
+            var url =
+                endpoint
+                    .replace("{name}", player.getUsername())
+                    .replace("{username}", player.getUsername())
+                    .replace("{uuid}", player.getPlayerId().toString())
+                    .replace("{ip}", player.getAddress())
+                    .replace("{list_address}", player.getServerListAddress())
+
+            val json = makeRequest(url).getOrThrow()
             val jsonHost = JsonPath.parse(json)?.read<String>(hostPath)
             val jsonPort = JsonPath.parse(json).read<String>(portPath).toIntOrNull()
 
             if (jsonHost == null || jsonPort == null) {
-                return error("Invalid server")
+                error("Invalid server")
             }
 
             TargetServer(jsonHost, jsonPort)
         }
-    }
 
     fun makeRequest(url: String): Result<String, Throwable> =
         runCatching {
@@ -45,7 +52,7 @@ class HttpServerFinder(
             // Send the request and handle the response
             client
                 .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply({ obj: HttpResponse<*>? -> obj!!.body().toString() })
+                .thenApply { obj: HttpResponse<*>? -> obj!!.body().toString() }
                 .join()
         }
 }
