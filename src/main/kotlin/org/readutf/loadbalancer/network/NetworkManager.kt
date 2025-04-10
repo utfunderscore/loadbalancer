@@ -54,8 +54,6 @@ class NetworkManager(
             client.connected.set(connected)
 
             if (!connected) {
-                client.onDisconnect()
-
                 clients.remove(client)
                 break
             }
@@ -76,8 +74,8 @@ class NetworkManager(
         active.set(false)
         socketChannel.close()
         clients.forEach {
-            it.readerThread.interrupt()
-            it.writerThread.interrupt()
+            it.readerThread?.interrupt()
+            it.writerThread?.interrupt()
         }
         clients.clear()
         connectionThread.interrupt()
