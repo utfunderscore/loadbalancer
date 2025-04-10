@@ -12,4 +12,13 @@ class Player(
     fun getUsername() = gameProfile.name
 
     fun getPlayerId() = gameProfile.uuid
+
+    fun getServerListAddress() = clientSettings.serverAddress
+
+    fun getAddress() =
+        client.socketChannel.remoteAddress
+            .toString()
+            .replace("/", "")
+            .split(":")
+            .first()
 }
