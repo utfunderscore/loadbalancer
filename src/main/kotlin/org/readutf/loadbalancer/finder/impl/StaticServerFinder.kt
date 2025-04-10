@@ -2,9 +2,9 @@ package org.readutf.loadbalancer.finder.impl
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import org.readutf.loadbalancer.client.Player
 import org.readutf.loadbalancer.finder.ServerFinder
 import org.readutf.loadbalancer.finder.TargetServer
-import java.util.UUID
 
 /**
  * A circular server finder
@@ -19,7 +19,7 @@ class StaticServerFinder(
     private var index = 0
 
     @Synchronized
-    override fun findServer(playerId: UUID): Result<TargetServer, Throwable> {
+    override fun findServer(player: Player): Result<TargetServer, Throwable> {
         val server = servers[index++]
 
         if (index > servers.size) index = 0

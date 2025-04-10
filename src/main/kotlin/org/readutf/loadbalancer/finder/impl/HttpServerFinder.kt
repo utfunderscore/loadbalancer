@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.runCatching
 import com.jayway.jsonpath.JsonPath
-import org.readutf.loadbalancer.client.Client
+import org.readutf.loadbalancer.client.Player
 import org.readutf.loadbalancer.finder.ServerFinder
 import org.readutf.loadbalancer.finder.TargetServer
 import java.net.URI
@@ -17,7 +17,7 @@ class HttpServerFinder(
     val hostPath: String,
     val portPath: String,
 ) : ServerFinder {
-    override fun findServer(client: Client): Result<TargetServer, Throwable> {
+    override fun findServer(player: Player): Result<TargetServer, Throwable> {
         return runCatching {
             val json = makeRequest(endpoint).getOrThrow()
             val jsonHost = JsonPath.parse(json)?.read<String>(hostPath)

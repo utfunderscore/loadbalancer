@@ -1,7 +1,12 @@
 package org.readutf.loadbalancer.listeners
 
 import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.sksamuel.hoplite.watch.ReloadableConfig
+import io.github.oshai.kotlinlogging.KotlinLogging
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minestom.server.network.packet.client.common.ClientSettingsPacket
 import net.minestom.server.network.packet.server.common.DisconnectPacket
@@ -10,27 +15,35 @@ import org.readutf.loadbalancer.client.Client
 import org.readutf.loadbalancer.finder.ServerFinder
 import org.readutf.loadbalancer.packet.PacketListener
 import org.readutf.loadbalancer.settings.BalancerSettings
-import org.slf4j.LoggerFactory
 import java.util.function.Supplier
 
 class ClientSettingsListener(
     val serverFinder: Supplier<ServerFinder>,
     val settings: ReloadableConfig<BalancerSettings>,
 ) : PacketListener<ClientSettingsPacket> {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = KotlinLogging.logger { }
     private val miniMessage = MiniMessage.miniMessage()
 
     override fun handlePacket(
         client: Client,
         packet: ClientSettingsPacket,
     ) {
-        val server =
-            serverFinder.get().findServer(client.gameProfile.uuid).getOrElse {
-                client.sendPacket(DisconnectPacket(miniMessage.deserialize(settings.getLatest().connectionError)))
-                logger.error("Server not found for ${client.gameProfile.name}", it)
+        var player =
+            client.toPlayer().getOrElse {
+                client.sendPacket(DisconnectPacket(Component.text("Internal error occured.").color(NamedTextColor.RED)))
+                logger.error { "Failed to get player from client: ${it.message}" }
                 return
             }
 
-        client.sendPacket(TransferPacket(server.address, server.port))
+        serverFinder
+            .get()
+            .findServer(player)
+            .onSuccess { server ->
+                logger.info { "Transferred ${player.getUsername()} to ${server.address}" }
+                client.sendPacket(TransferPacket(server.address, server.port))
+            }.onFailure {
+                logger.error { "Server not found for ${player.getUsername()}" }
+                client.disconnect(miniMessage.deserialize(settings.getLatest().connectionError))
+            }
     }
 }
