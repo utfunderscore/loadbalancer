@@ -16,7 +16,7 @@ class LoginStartListener : PacketListener<ClientLoginStartPacket> {
     ) {
         logger.info { "New connection from ${client.socketChannel.remoteAddress}" }
         var gameProfile = GameProfile(packet.profileId, packet.username)
-        client.sendPacket(LoginSuccessPacket(gameProfile))
         client.gameProfile = gameProfile
+        client.sendPacket(LoginSuccessPacket(gameProfile))
     }
 }
