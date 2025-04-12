@@ -1,7 +1,7 @@
 host: 0.0.0.0
 port: 25565
 motd: "<rainbow>Default loadbalancer config"
-connectionError: "<red>Could not connect you to backend server.</red>"
+connection-error: "<red>Could not connect you to backend server.</red>"
 static:
   enabled: true
   targets:
@@ -12,8 +12,8 @@ static:
 http:
   enabled: false
   host: https://example.com/{username}/{uuid}
-  hostPath: "$.host"
-  portPath: "$.port"
+  host-path: "$.host"
+  port-path: "$.port"
 geo:
   enabled: true
   token: ''

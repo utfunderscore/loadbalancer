@@ -1,5 +1,6 @@
 package org.readutf.loadbalancer.settings
 
+import com.sksamuel.hoplite.ConfigAlias
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import com.sksamuel.hoplite.watch.ReloadableConfig
@@ -8,14 +9,13 @@ import java.io.InputStream
 import java.net.InetSocketAddress
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import kotlin.io.path.notExists
 
 data class BalancerSettings(
     val host: String = "0.0.0.0",
     val port: Int = 25565,
     val motd: String = "<rainbow>Default loadbalancer config",
-    val connectionError: String = "<red>Could not connect you to backend server.</red>",
+    @ConfigAlias("connection-error") val connectionError: String = "<red>Could not connect you to backend server.</red>",
     val static: StaticBalancerConfig = StaticBalancerConfig(),
     val http: HttpBalancerConfig = HttpBalancerConfig(),
     val geo: GeoBalancerConfig = GeoBalancerConfig(),
@@ -30,7 +30,7 @@ data class BalancerSettings(
 
             var destination = workDir.resolve("settings.yml")
             if (destination.notExists()) {
-                Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(inputStream, destination)
             }
 
             val loader =
@@ -75,6 +75,6 @@ data class GeoFilter(
 data class HttpBalancerConfig(
     val enabled: Boolean = false,
     val host: String = "https://example.com/{username}/{uuid}",
-    val hostPath: String = "$.host",
-    val portPath: String = "$.port",
+    @ConfigAlias("host-path") val hostPath: String = "$.host",
+    @ConfigAlias("port-path") val portPath: String = "$.port",
 )
