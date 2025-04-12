@@ -2,6 +2,7 @@ host: 0.0.0.0
 port: 25565
 motd: "<rainbow>Default loadbalancer config"
 connection-error: "<red>Could not connect you to backend server.</red>"
+redact-ip: true
 static:
   enabled: true
   targets:
@@ -27,7 +28,7 @@ geo:
         - address: localhost
           port: 25568
     - type: country
-      value: DE
+      value: GB
       targets:
         - address: localhost
           port: 25569

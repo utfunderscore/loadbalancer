@@ -14,6 +14,7 @@ import org.readutf.loadbalancer.client.Client
 import org.readutf.loadbalancer.packet.PacketListener
 import org.readutf.loadbalancer.packet.StatusRequestResponse
 import org.readutf.loadbalancer.settings.BalancerSettings
+import org.readutf.loadbalancer.utils.AddressUtils
 
 class StatusRequestListener(
     val balancerSettings: ReloadableConfig<BalancerSettings>,
@@ -27,7 +28,9 @@ class StatusRequestListener(
         client: Client,
         packet: StatusRequestPacket,
     ) {
-        logger.info { "Server list ping from ${client.socketChannel.remoteAddress}" }
+        val latest = balancerSettings.getLatest()
+
+        logger.info { "Server list ping from ${AddressUtils.redact(client.socketChannel.remoteAddress, latest)}" }
 
         val handshakeInfo: ClientHandshakePacket? = client.handshakeInfo
 
@@ -44,7 +47,7 @@ class StatusRequestListener(
                     protocolVersion = handshakeInfo.protocolVersion(),
                     maxPlayers = 1000,
                     onlinePlayers = 0,
-                    description = miniMessage.deserialize(balancerSettings.getLatest().motd),
+                    description = miniMessage.deserialize(latest.motd),
                     enforcesSecureChat = false,
                     previewsChat = false,
                 ).build(componentSerializer),

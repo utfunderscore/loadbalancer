@@ -15,6 +15,7 @@ data class BalancerSettings(
     val host: String = "0.0.0.0",
     val port: Int = 25565,
     val motd: String = "<rainbow>Default loadbalancer config",
+    val redactIp: Boolean = true,
     @ConfigAlias("connection-error") val connectionError: String = "<red>Could not connect you to backend server.</red>",
     val static: StaticBalancerConfig = StaticBalancerConfig(),
     val http: HttpBalancerConfig = HttpBalancerConfig(),

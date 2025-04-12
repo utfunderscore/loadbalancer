@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath
 import org.readutf.loadbalancer.client.Player
 import org.readutf.loadbalancer.finder.ServerFinder
 import org.readutf.loadbalancer.finder.TargetServer
+import java.net.InetSocketAddress
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -19,12 +20,14 @@ class HttpServerFinder(
 ) : ServerFinder {
     override fun findServer(player: Player): Result<TargetServer, Throwable> =
         runCatching {
+            val socket = player.getAddress() as InetSocketAddress
+
             var url =
                 endpoint
                     .replace("{name}", player.getUsername())
                     .replace("{username}", player.getUsername())
                     .replace("{uuid}", player.getPlayerId().toString())
-                    .replace("{ip}", player.getAddress())
+                    .replace("{ip}", socket.address.hostAddress)
                     .replace("{list_address}", player.getServerListAddress())
 
             val json = makeRequest(url).getOrThrow()

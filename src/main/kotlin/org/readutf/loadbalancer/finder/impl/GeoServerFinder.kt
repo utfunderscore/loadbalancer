@@ -7,14 +7,15 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.readutf.loadbalancer.client.Player
 import org.readutf.loadbalancer.finder.ServerFinder
 import org.readutf.loadbalancer.finder.TargetServer
-import org.readutf.loadbalancer.settings.GeoBalancerConfig
+import org.readutf.loadbalancer.settings.BalancerSettings
+import org.readutf.loadbalancer.utils.AddressUtils
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class GeoServerFinder(
-    val geoBalancerConfig: GeoBalancerConfig,
+    val balancerSettings: BalancerSettings,
 ) : ServerFinder {
     private val client: HttpClient = HttpClient.newHttpClient()
     private val gson = Gson()
@@ -22,12 +23,12 @@ class GeoServerFinder(
     private val logger = KotlinLogging.logger { }
 
     override fun findServer(player: Player): Result<TargetServer, Throwable> {
+        val geoSettings = balancerSettings.geo
+
         var address = player.getAddress()
-        logger.info { "Finding region for $address" }
+        logger.info { "Finding region for ${AddressUtils.redact(address, balancerSettings)}" }
 
-        val uri = URI.create("https://ipinfo.io/$address?token=${geoBalancerConfig.token}")
-
-        logger.info { "Finding server for ${player.getAddress()}" }
+        val uri = URI.create("https://ipinfo.io/$address?token=${geoSettings.token}")
 
         val request =
             HttpRequest
@@ -38,12 +39,12 @@ class GeoServerFinder(
         val jsonString =
             client
                 .sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply { obj: HttpResponse<*>? -> obj!!.body().toString() }
+                .thenApply { response -> response.body().toString() }
                 .join()
 
         val json = gson.fromJson(jsonString, GeoLocation::class.java)
 
-        for (filter in geoBalancerConfig.filters) {
+        for (filter in geoSettings.filters) {
             when (filter.type) {
                 "region" -> {
                     if (json.region == filter.value) {
@@ -63,7 +64,7 @@ class GeoServerFinder(
             }
         }
 
-        return Ok(geoBalancerConfig.fallback)
+        return Ok(geoSettings.fallback)
     }
 
     data class GeoLocation(

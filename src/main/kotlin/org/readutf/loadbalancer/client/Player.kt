@@ -15,10 +15,5 @@ class Player(
 
     fun getServerListAddress() = clientSettings.serverAddress
 
-    fun getAddress() =
-        client.socketChannel.remoteAddress
-            .toString()
-            .replace("/", "")
-            .split(":")
-            .first()
+    fun getAddress() = client.socketChannel.remoteAddress
 }

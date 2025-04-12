@@ -36,7 +36,7 @@ class Loadbalancer {
 
     val packetManager =
         PacketManager.also {
-            it.registerListener(LoginStartListener())
+            it.registerListener(LoginStartListener(settings))
             it.registerListener(ClientHandshakeListener())
             it.registerListener(StatusRequestListener(settings))
             it.registerListener(PingRequestListener())
@@ -75,7 +75,7 @@ class Loadbalancer {
             } else if (settings.static.enabled) {
                 StaticServerFinder(settings.static.targets)
             } else if (settings.geo.enabled) {
-                GeoServerFinder(settings.geo)
+                GeoServerFinder(settings)
             } else {
                 error("No server finder is enabled")
             }
