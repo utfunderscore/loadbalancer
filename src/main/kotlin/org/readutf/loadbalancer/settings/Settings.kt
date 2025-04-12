@@ -3,7 +3,6 @@ package org.readutf.loadbalancer.settings
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import com.sksamuel.hoplite.watch.ReloadableConfig
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.readutf.loadbalancer.finder.TargetServer
 import java.io.InputStream
 import java.net.InetSocketAddress
@@ -17,14 +16,13 @@ data class BalancerSettings(
     val port: Int = 25565,
     val motd: String = "<rainbow>Default loadbalancer config",
     val connectionError: String = "<red>Could not connect you to backend server.</red>",
-    val static: StaticBalancer = StaticBalancer(),
-    val http: HttpBalancer = HttpBalancer(),
+    val static: StaticBalancerConfig = StaticBalancerConfig(),
+    val http: HttpBalancerConfig = HttpBalancerConfig(),
+    val geo: GeoBalancerConfig = GeoBalancerConfig(),
 ) {
     fun createInetSocket(): InetSocketAddress = InetSocketAddress(host, port)
 
     companion object {
-        val miniMessage = MiniMessage.miniMessage()
-
         fun load(workDir: Path): ReloadableConfig<BalancerSettings> {
             val inputStream: InputStream? = BalancerSettings::class.java.getResourceAsStream("/settings.yml")
 
@@ -48,7 +46,7 @@ data class BalancerSettings(
     }
 }
 
-data class StaticBalancer(
+data class StaticBalancerConfig(
     val enabled: Boolean = true,
     val targets: List<TargetServer> =
         listOf(
@@ -57,7 +55,24 @@ data class StaticBalancer(
         ),
 )
 
-data class HttpBalancer(
+data class GeoBalancerConfig(
+    val token: String = "",
+    val enabled: Boolean = true,
+    val fallback: TargetServer = TargetServer("localhost", 25567),
+    val filters: List<GeoFilter> =
+        listOf(
+            GeoFilter("country", "US", listOf(TargetServer("localhost", 25568))),
+            GeoFilter("country", "DE", listOf(TargetServer("localhost", 25569))),
+        ),
+)
+
+data class GeoFilter(
+    val type: String,
+    val value: String,
+    val targets: List<TargetServer>,
+)
+
+data class HttpBalancerConfig(
     val enabled: Boolean = false,
     val host: String = "https://example.com/{username}/{uuid}",
     val hostPath: String = "$.host",

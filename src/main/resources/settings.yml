@@ -14,3 +14,20 @@ http:
   host: https://example.com/{username}/{uuid}
   hostPath: "$.host"
   portPath: "$.port"
+geo:
+  enabled: true
+  token: ''
+  fallback:
+    address: localhost
+    port: 25567
+  filters:
+    - type: country
+      value: US
+      targets:
+        - address: localhost
+          port: 25568
+    - type: country
+      value: DE
+      targets:
+        - address: localhost
+          port: 25569
