@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.sksamuel.hoplite.watch.ReloadableConfig
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.readutf.loadbalancer.finder.ServerFinder
+import org.readutf.loadbalancer.finder.impl.GeoServerFinder
 import org.readutf.loadbalancer.finder.impl.HttpServerFinder
 import org.readutf.loadbalancer.finder.impl.StaticServerFinder
 import org.readutf.loadbalancer.listeners.ClientHandshakeListener
@@ -73,6 +74,8 @@ class Loadbalancer {
                 HttpServerFinder(settings.http.host, settings.http.hostPath, settings.http.portPath)
             } else if (settings.static.enabled) {
                 StaticServerFinder(settings.static.targets)
+            } else if (settings.geo.enabled) {
+                GeoServerFinder(settings.geo)
             } else {
                 error("No server finder is enabled")
             }
